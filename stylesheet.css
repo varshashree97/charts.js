@@ -1,0 +1,96 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto);
+
+body {
+  font-family: Roboto, sans-serif;
+}
+
+/* #chart {
+  min-width: 1060px;
+  margin: 35px auto;
+  -webkit-box-shadow: 0 10px 6px -6px #cfcfcf;
+  -moz-box-shadow: 0 10px 6px -6px #cfcfcf;
+  box-shadow: 0 10px 6px -6px #cfcfcf;  
+  border: 1px solid #000;
+} */
+
+@import url(https://fonts.googleapis.com/css?family=Roboto);
+
+body {
+  font-family: Roboto, sans-serif;
+}
+
+#chart {
+  min-width: 1062px;
+  margin: 35px auto;
+  float: left;
+  -webkit-box-shadow: 0 10px 6px -6px #cfcfcf;
+  -moz-box-shadow: 0 10px 6px -6px #cfcfcf;
+  box-shadow: 0 10px 6px -6px #cfcfcf;  
+  border: 1px solid #000;
+}
+
+
+
+.chart-gauge {
+  width: 200px;
+  margin: 10px auto;
+}
+
+.chart-color1 {
+  fill: #B388FF;
+}
+
+.chart-color2 {
+  fill: #EA80FC;
+}
+
+.chart-color3 {
+  fill: #FF80AB;
+}
+
+.chart-color4 {
+  fill: #ff8a80;
+}
+
+.needle,
+.needle-center {
+  fill: #464A4F;
+}
+
+.prose {
+  text-align: center;
+  font-family: sans-serif;
+  color: #ababab;
+}
+body {
+  font-family:  Helvetica, Arial, sans-serif;
+  margin: 32px;
+}
+
+#power-gauge g.arc {
+  fill: steelblue;
+}
+
+#power-gauge g.pointer {
+  fill: #e85116;
+  stroke: #b64011;
+}
+
+#power-gauge g.label text {
+  text-anchor: middle;
+  font-size: 14px;
+  font-weight: bold;
+  fill: #666;
+  }
+
+  .gauge_holder{
+      border: 1px solid #000;
+      width: 300px;
+      height: 200px;
+      padding: 20px;
+      float: left;
+      margin-right: 20px;
+      -webkit-box-shadow: 0 10px 6px -6px #cfcfcf;
+    -moz-box-shadow: 0 10px 6px -6px #cfcfcf;
+    box-shadow: 0 10px 6px -6px #cfcfcf;        
+  }

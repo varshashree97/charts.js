@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="./stylesheet/stylesheet.css" type="text/css">
+<title>Page Title</title>
+</head>
+<body>
+    <div class="gauge_holder">
+    <div id="power-gauge"></div>
+    </div>   
+    <div class="gauge_holder">
+    <div id="power-gauge_1"></div>
+    </div>
+    <div class="gauge_holder">
+    <div id="power-gauge_2"></div>	
+    </div>
+    <div id="chart" style="width: 950;height: 500">
+    </div>
+
+    <!-- <div id="chart_1"></div> -->
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+   <script type="text/javascript">
+
+var options = {
+            chart: {
+                height: 350,
+                type: 'bar',
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: '55%',
+                    endingShape: 'rounded'	
+                },
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ['transparent']
+            },
+            series: [{
+                name: 'Net Profit',
+                data: [44, 55, 57, 56]
+            }, {
+                name: 'Revenue',
+                data: [76, 85, 101, 98]
+            }, {
+                name: 'Free Cash Flow',
+                data: [35, 41, 36, 26]
+            }],
+            xaxis: {
+                categories: ['Feb', 'Mar', 'Apr', 'May'],
+            },
+            yaxis: {
+                title: {
+                    text: '$ (thousands)'
+                }
+            },
+            fill: {
+                opacity: 1
+
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return "$ " + val + " thousands"
+                    }
+                }
+            }
+        }
+
+        var chart = new ApexCharts(
+            document.querySelector("#chart"),
+            options
+        );
+
+        chart.render();
+
+</script>
+<script>
+    var gauge = function(container, configuration) {
+      var that = {};
+      var config = {
+        size						: 710,
+        clipWidth					: 200,
+        clipHeight					: 110,
+        ringInset					: 20,
+        ringWidth					: 20,
+        
+        pointerWidth				: 10,
+        pointerTailLength			: 5,
+        pointerHeadLengthPercent	: 0.9,
+        
+        minValue					: 0,
+        maxValue					: 10,
+        
+        minAngle					: -90,
+        maxAngle					: 90,
+        
+        transitionMs				: 750,
+        
+        majorTicks					: 3,
+        labelFormat					: d3.format('d'),
+        labelInset					: 10,
+        
+        arcColorFn					: d3.interpolateHsl(d3.rgb('#e8e2ca'), d3.rgb('#3e6c0a'))
+      };
+      var range = undefined;
+      var r = undefined;
+      var pointerHeadLength = undefined;
+      var value = 0;
+      
+      var svg = undefined;
+      var arc = undefined;
+      var scale = undefined;
+      var ticks = undefined;
+      var tickData = undefined;
+      var pointer = undefined;
+    
+      var donut = d3.pie();
+      
+      function deg2rad(deg) {
+        return deg * Math.PI / 180;
+      }
+      
+      function newAngle(d) {
+        var ratio = scale(d);
+        var newAngle = config.minAngle + (ratio * range);
+        return newAngle;
+      }
+      
+      function configure(configuration) {
+        var prop = undefined;
+        for ( prop in configuration ) {
+          config[prop] = configuration[prop];
+        }
+        
+        range = config.maxAngle - config.minAngle;
+        r = config.size / 2;
+        pointerHeadLength = Math.round(r * config.pointerHeadLengthPercent);
+    
+        // a linear scale that maps domain values to a percent from 0..1
+        scale = d3.scaleLinear()
+          .range([0,1])
+          .domain([config.minValue, config.maxValue]);
+          
+        ticks = scale.ticks(config.majorTicks);
+        tickData = d3.range(config.majorTicks).map(function() {return 1/config.majorTicks;});
+        
+        arc = d3.arc()
+          .innerRadius(r - config.ringWidth - config.ringInset)
+          .outerRadius(r - config.ringInset)
+          .startAngle(function(d, i) {
+            var ratio = d * i;
+            return deg2rad(config.minAngle + (ratio * range));
+          })
+          .endAngle(function(d, i) {
+            var ratio = d * (i+1);
+            return deg2rad(config.minAngle + (ratio * range));
+          });
+      }
+      that.configure = configure;
+      
+      function centerTranslation() {
+        return 'translate('+r +','+ r +')';
+      }
+      
+      function isRendered() {
+        return (svg !== undefined);
+      }
+      that.isRendered = isRendered;
+      
+      function render(newValue) {
+        svg = d3.select(container)
+          .append('svg:svg')
+            .attr('class', 'gauge')
+            .attr('width', config.clipWidth)
+            .attr('height', config.clipHeight);
+        
+        var centerTx = centerTranslation();
+        
+        var arcs = svg.append('g')
+            .attr('class', 'arc')
+            .attr('transform', centerTx);
+        
+        arcs.selectAll('path')
+            .data(tickData)
+          .enter().append('path')
+            .attr('fill', function(d, i) {
+              return config.arcColorFn(d * i);
+            })
+            .attr('d', arc);
+        
+        var lg = svg.append('g')
+            .attr('class', 'label')
+            .attr('transform', centerTx);
+        lg.selectAll('text')
+            .data(ticks)
+          .enter().append('text')
+            .attr('transform', function(d) {
+              var ratio = scale(d);
+              var newAngle = config.minAngle + (ratio * range);
+              return 'rotate(' +newAngle +') translate(0,' +(config.labelInset - r) +')';
+            })
+            .text(config.labelFormat);
+    
+        var lineData = [ [config.pointerWidth / 2, 0], 
+                [0, -pointerHeadLength],
+                [-(config.pointerWidth / 2), 0],
+                [0, config.pointerTailLength],
+                [config.pointerWidth / 2, 0] ];
+        var pointerLine = d3.line().curve(d3.curveLinear)
+        var pg = svg.append('g').data([lineData])
+            .attr('class', 'pointer')
+            .attr('transform', centerTx);
+            
+        pointer = pg.append('path')
+          .attr('d', pointerLine/*function(d) { return pointerLine(d) +'Z';}*/ )
+          .attr('transform', 'rotate(' +config.minAngle +')');
+          
+        update(newValue === undefined ? 0 : newValue);
+      }
+      that.render = render;
+      function update(newValue, newConfiguration) {
+        if ( newConfiguration  !== undefined) {
+          configure(newConfiguration);
+        }
+        var ratio = scale(newValue);
+        var newAngle = config.minAngle + (ratio * range);
+        pointer.transition()
+          .duration(config.transitionMs)
+          .ease(d3.easeElastic)
+          .attr('transform', 'rotate(' +newAngle +')');
+      }
+      that.update = update;
+    
+      configure(configuration);
+      
+      return that;
+    };
+    </script>
+
+    
+<script>
+    function onDocumentReady() {
+      var powerGauge = gauge('#power-gauge',{
+        size: 300,
+        clipWidth: 300,
+        clipHeight: 300,
+        ringWidth: 60,
+        maxValue: 10,
+        transitionMs: 4000,
+      });
+      var powerGauge_1 = gauge('#power-gauge_1',{
+        size: 300,
+        clipWidth: 300,
+        clipHeight: 300,
+        ringWidth: 60,
+        maxValue: 10,
+        transitionMs: 4000,
+      });    
+      var powerGauge_2 = gauge('#power-gauge_2',{
+        size: 300,
+        clipWidth: 300,
+        clipHeight: 300,
+        ringWidth: 60,
+        maxValue: 10,
+        transitionMs: 4000,
+      });
+    
+      powerGauge.render();
+      powerGauge_1.render();
+        powerGauge_2.render();
+    
+    
+    
+        
+      function updateReadings() {
+        // just pump in random data here...
+        powerGauge.update(0.5);
+            powerGauge_1.update(2);
+            powerGauge_2.update(8);
+      }
+      
+      // every few seconds update reading values
+      updateReadings();
+        
+      // setInterval(function() {
+      // 	updateReadings();
+      // }, 5 * 1000);
+    
+    
+    
+    
+        
+    }
+    
+    if ( !window.isLoaded ) {
+      window.addEventListener("load", function() {
+        onDocumentReady();
+      }, false);
+    } else {
+      onDocumentReady();
+    }
+    </script>
+
+</body>
+</html>
